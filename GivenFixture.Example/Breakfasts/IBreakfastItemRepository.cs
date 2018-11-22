@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
 
-namespace FluentFixture.Example.Breakfasts
+namespace GivenFixture.Example.Breakfasts
 {
     public interface IBreakfastItemRepository
     {

@@ -1,4 +1,4 @@
-﻿namespace FluentFixture.Example.Breakfasts
+﻿namespace GivenFixture.Example.Breakfasts
 {
     public class BreakfastItem
     {

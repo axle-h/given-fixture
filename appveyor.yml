@@ -4,10 +4,10 @@ shallow_clone: true
 
 build_script:
   - dotnet restore
-  - dotnet pack -c Release -o ../artifacts FluentFixture /p:PackageVersion=%APPVEYOR_BUILD_VERSION% /p:Version=%APPVEYOR_BUILD_VERSION%  /p:AssemblyVersion=%APPVEYOR_BUILD_VERSION%
+  - dotnet pack -c Release -o ../artifacts GivenFixture /p:PackageVersion=%APPVEYOR_BUILD_VERSION% /p:Version=%APPVEYOR_BUILD_VERSION%  /p:AssemblyVersion=%APPVEYOR_BUILD_VERSION%
 
 test_script:
-  - dotnet test -c Release FluentFixture.Example
+  - dotnet test -c Release GivenFixture.Example
 
 for:
 
