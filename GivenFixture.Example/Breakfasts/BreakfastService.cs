@@ -4,10 +4,15 @@ using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
-namespace FluentFixture.Example.Breakfasts
+namespace GivenFixture.Example.Breakfasts
 {
     public class BreakfastService
     {
+        private static readonly ICollection<BreakfastItemType> FullEnglishTypes = Enum.GetValues(typeof(BreakfastItemType))
+                                                                                      .Cast<BreakfastItemType>()
+                                                                                      .OrderBy(x => x)
+                                                                                      .ToList();
+
         private readonly IBreakfastItemRepository _breakfastItemRepository;
 
         public BreakfastService(IBreakfastItemRepository breakfastItemRepository)
@@ -24,7 +29,7 @@ namespace FluentFixture.Example.Breakfasts
 
             if (!(request.BreakfastItems?.Any() ?? false))
             {
-                throw new ArgumentException("All breakfasts must have breakfast items", nameof(request.BreakfastItems));
+                throw new ArgumentException("All breakfasts must have breakfast items", nameof(request));
             }
 
             var itemTasks = request.BreakfastItems.Distinct().Select(_breakfastItemRepository.GetBreakfastItemAsync);
@@ -42,18 +47,18 @@ namespace FluentFixture.Example.Breakfasts
 
         private static string GetBreakfastName(ICollection<BreakfastItem> items)
         {
-            var fullEnglishTypes = Enum.GetValues(typeof(BreakfastItemType)).Cast<BreakfastItemType>().OrderBy(x => x);
-            var isFullEnglish = items.Select(x => x.Type).OrderBy(x => x).SequenceEqual(fullEnglishTypes);
+            var itemTypes = items.Select(x => x.Type).ToList();
 
-            if (isFullEnglish)
+            if (FullEnglishTypes.All(itemTypes.Contains))
             {
                 return "Full English Breakfast";
             }
             
-            var toast = items.FirstOrDefault(i => i.Type == BreakfastItemType.Toast);
-            if (toast != null)
+            if (itemTypes.Contains(BreakfastItemType.Toast))
             {
-                return $"{GetItemNames(items.Except(new [] { toast }))} on Toast";
+                var notToast = items.Where(x => x.Type != BreakfastItemType.Toast).ToList();
+                var toast = items.Except(notToast).First();
+                return $"{GetItemNames(notToast)} on {toast.Name}";
             }
 
             return GetItemNames(items);

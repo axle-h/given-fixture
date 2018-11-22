@@ -1,21 +1,60 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/242cdlidfmyle6o2/branch/master?svg=true)](https://ci.appveyor.com/project/axle-h/fluent-fixture/branch/master)
-[![NuGet](https://img.shields.io/nuget/v/FluentFixture.svg)](https://www.nuget.org/packages/FluentFixture/)
+[![Build status](https://ci.appveyor.com/api/projects/status/242cdlidfmyle6o2/branch/master?svg=true)](https://ci.appveyor.com/project/axle-h/given-fixture/branch/master)
+[![NuGet](https://img.shields.io/nuget/v/given-fixture.svg)](https://www.nuget.org/packages/given-fixture/)
 
-# fluent-fixture
+# given-fixture
 
-Simple test fixture pattern.
+Simple but opinionated, fluent test fixture pattern.
 
-Intended to be used to write tests like this:
+Lets us write unit tests like this:
 
 ```C#
-[Fact]
-public void When_attempting_to_get_breakfast_with_no_items()
+public class BreakfastServiceTests
 {
-    using (var fixture = new BreakfastServiceFixture())
-    {
-        fixture.HavingGetBreakfastRequest()
-               .WhenGettingBreakfast()
-               .ShouldThrow<ArgumentException>();
-    }
+    [Fact]
+    public Task When_attempting_to_get_breakfast_with_null_request() =>
+        Given.Fixture
+             .When<BreakfastService, Breakfast>(x => x.GetBreakfastAsync(null))
+             .ShouldThrowArgumentNullException("request")
+             .RunAsync();
+
+    [Fact]
+    public Task When_attempting_to_get_breakfast_with_no_items() =>
+        Given.Fixture
+             .WhenGettingBreakfast()
+             .ShouldThrowArgumentException("request")
+             .RunAsync();
+
+    [Fact]
+    public Task When_getting_full_english_breakfast() =>
+        Given.Fixture
+             .HavingBreakfastItem(BreakfastItemType.Bacon, out var bacon)
+             .HavingBreakfastItem(BreakfastItemType.Egg, out var egg)
+             .HavingBreakfastItem(BreakfastItemType.Sausage, out var sausage)
+             .HavingBreakfastItem(BreakfastItemType.Toast, out var toast)
+             .WhenGettingBreakfast(BreakfastItemType.Bacon, BreakfastItemType.Egg,
+                                   BreakfastItemType.Sausage, BreakfastItemType.Toast)
+             .ShouldReturnBreakfastWithCorrectNameAndPrice("Full English Breakfast", bacon, egg, sausage, toast)
+             .RunAsync();
+}
+```
+
+We use extension methods to keep the fluent test conversation going:
+
+```C#
+internal static class BreakfastTestExtensions
+{
+    public static ITestFixture HavingBreakfastItem(this ITestFixture fixture, BreakfastItemType type, out BreakfastItem item) =>
+        fixture.HavingModel(out item, c => c.With(x => x.Type, type)
+                                            .With(x => x.Name, type.ToString()))
+               .HavingMocked<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(type), item);
+
+
+    public static ITestFixture WhenGettingBreakfast(this ITestFixture fixture, params BreakfastItemType[] types) =>
+        fixture.When<BreakfastService, Breakfast>(x => x.GetBreakfastAsync(new GetBreakfastRequest { BreakfastItems = types }));
+
+    public static ITestFixture ShouldReturnBreakfastWithCorrectNameAndPrice(this ITestFixture fixture,
+                                                                            string expectedName,
+                                                                            params BreakfastItem[] expectedItems) =>
+        fixture.ShouldReturnEquivalent(new Breakfast { Name = expectedName, Price = expectedItems.Sum(i => i.Price) });
 }
 ```

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace FluentFixture.Example.Breakfasts
+namespace GivenFixture.Example.Breakfasts
 {
     public class GetBreakfastRequest
     {
