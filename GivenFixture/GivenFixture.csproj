@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DocumentationFile>bin\Release\netstandard2.0\given.fixture.xml</DocumentationFile>
+    <DocumentationFile>bin\Release\netstandard2.0\GivenFixture.xml</DocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>

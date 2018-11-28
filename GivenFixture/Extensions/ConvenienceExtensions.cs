@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Autofac.Core;
 using AutoFixture;
 using AutoFixture.Dsl;
+using Bogus;
 using Moq;
 
 namespace GivenFixture.Extensions
@@ -103,21 +104,30 @@ namespace GivenFixture.Extensions
             fixture.WhenHavingStringProperty(key, x => x == value, action);
 
         /// <summary>
-        /// Picks a random model from the specified collection and optionally mutates it.
+        /// Performs an arrange action.
+        /// </summary>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="action">The action.</param>
+        /// <returns></returns>
+        public static ITestFixture Having(this ITestFixture fixture, Action action)
+        {
+            action();
+            return fixture;
+        }
+
+        /// <summary>
+        /// Picks a random model from the specified collection.
         /// </summary>
         /// <typeparam name="TModel">The type of the model.</typeparam>
         /// <param name="fixture">The fixture.</param>
         /// <param name="models">The models.</param>
         /// <param name="model">The model.</param>
-        /// <param name="mutationFunc">The mutation function.</param>
         /// <returns></returns>
         public static ITestFixture HavingRandom<TModel>(this ITestFixture fixture,
                                                         ICollection<TModel> models,
-                                                        out TModel model,
-                                                        Action<TModel> mutationFunc = null)
+                                                        out TModel model)
         {
             model = fixture.Faker.Random.CollectionItem(models);
-            mutationFunc?.Invoke(model);
             return fixture;
         }
 
@@ -127,15 +137,27 @@ namespace GivenFixture.Extensions
         /// <typeparam name="TService">The type of the service.</typeparam>
         /// <param name="fixture">The fixture.</param>
         /// <param name="mockAction">The mock action.</param>
-        /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
         public static ITestFixture HavingMock<TService>(this ITestFixture fixture,
-                                                        Action<Mock<TService>> mockAction,
-                                                        params Parameter[] parameters)
+                                                        Action<Mock<TService>> mockAction)
             where TService : class
         {
-            var mock = fixture.AutoMock.Mock<TService>(parameters);
+            var mock = fixture.AutoMock.Mock<TService>();
             mockAction(mock);
+            return fixture;
+        }
+
+        /// <summary>
+        /// Gets a mocked object of the specified type
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="service">The service.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMock<TService>(this ITestFixture fixture, out TService service)
+            where TService : class
+        {
+            service = fixture.AutoMock.Mock<TService>().Object;
             return fixture;
         }
 
@@ -155,7 +177,7 @@ namespace GivenFixture.Extensions
                                                                    string because = null)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).ReturnsAsync(result).Verifiable(because));
-
+        
         /// <summary>
         /// Configures a mock of the specified type to setup a call matching the specified expression to return the specified result.
         /// </summary>
@@ -172,8 +194,7 @@ namespace GivenFixture.Extensions
                                                                    string because = null)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).Returns(result).Verifiable(because));
-
-
+        
         /// <summary>
         /// Configures a mock of the specified type to setup a call matching the specified expression.
         /// </summary>
@@ -189,6 +210,20 @@ namespace GivenFixture.Extensions
             fixture.HavingMock<TService>(m => m.Setup(expression).Verifiable(because));
 
         /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a completed task.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="because">The because.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMocked<TService>(this ITestFixture fixture,
+                                                          Expression<Func<TService, Task>> expression,
+                                                          string because = null)
+            where TService : class =>
+            fixture.HavingMock<TService>(m => m.Setup(expression).Returns(Task.CompletedTask).Verifiable(because));
+
+        /// <summary>
         /// Creates an auto fixture constructed instance of the specified model.
         /// </summary>
         /// <typeparam name="TModel">The type of the model.</typeparam>
@@ -200,10 +235,7 @@ namespace GivenFixture.Extensions
                                                        out TModel model,
                                                        Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer = null)
         {
-            var builder = fixture.AutoFixture.Build<TModel>();
-
-            model = composer == null ? builder.Create() : composer(builder).Create();
-
+            model = fixture.GetComposer(composer).Create();
             return fixture;
         }
 
@@ -219,12 +251,29 @@ namespace GivenFixture.Extensions
                                                         out ICollection<TModel> models,
                                                         Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer = null)
         {
-            var builder = fixture.AutoFixture.Build<TModel>();
-
-            var result = composer == null ? builder.CreateMany() : composer(builder).CreateMany();
-            models = result.ToList();
-
+            models = fixture.GetComposer(composer).CreateMany().ToList();
             return fixture;
+        }
+
+        /// <summary>
+        /// Uses the faker on the fixture as a factory for some fake data.
+        /// </summary>
+        /// <typeparam name="TFake">The type of the fake.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="factory">The factory.</param>
+        /// <param name="fake">The fake.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingFake<TFake>(this ITestFixture fixture, Func<Faker, TFake> factory, out TFake fake)
+        {
+            fake = factory(fixture.Faker);
+            return fixture;
+        }
+
+        private static IPostprocessComposer<TModel> GetComposer<TModel>(this ITestFixture fixture, 
+                                                                        Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer)
+        {
+            var builder = fixture.AutoFixture.Build<TModel>();
+            return composer == null ? builder : composer(builder);
         }
     }
 }

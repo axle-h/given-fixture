@@ -1,7 +1,5 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
-using FluentAssertions;
 using GivenFixture.Extensions;
 using GivenFixture.Example.Breakfasts;
 using Xunit;
@@ -53,6 +51,14 @@ namespace GivenFixture.Example
                  .HavingBreakfastItem(BreakfastItemType.Sausage, out var sausage)
                  .WhenGettingBreakfast(BreakfastItemType.Bacon, BreakfastItemType.Egg, BreakfastItemType.Sausage)
                  .ShouldReturnBreakfastWithCorrectNameAndPrice("Bacon, Egg and Sausage", bacon, egg, sausage)
+                 .RunAsync();
+
+        [Fact]
+        public Task When_getting_duplicate_bacon() =>
+            Given.Fixture
+                 .HavingBreakfastItem(BreakfastItemType.Bacon, out var bacon)
+                 .WhenGettingBreakfast(BreakfastItemType.Bacon, BreakfastItemType.Bacon)
+                 .ShouldReturnBreakfastWithCorrectNameAndPrice("Bacon", bacon)
                  .RunAsync();
     }
 

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections;
-using System.Collections.Generic;
 using FluentAssertions;
 
 namespace GivenFixture.Extensions
@@ -49,6 +48,22 @@ namespace GivenFixture.Extensions
             fixture.ShouldReturn(x => x.Should().BeNull());
 
         /// <summary>
+        /// Adds an assertion to the specified fixture that the result returned should be true.
+        /// </summary>
+        /// <param name="fixture">The fixture.</param>
+        /// <returns></returns>
+        public static ITestFixture ShouldReturnTrue(this ITestFixture fixture) =>
+            fixture.ShouldReturn<bool>(x => x.Should().BeTrue());
+
+        /// <summary>
+        /// Adds an assertion to the specified fixture that the result returned should be false.
+        /// </summary>
+        /// <param name="fixture">The fixture.</param>
+        /// <returns></returns>
+        public static ITestFixture ShouldReturnFalse(this ITestFixture fixture) =>
+            fixture.ShouldReturn<bool>(x => x.Should().BeFalse());
+        
+        /// <summary>
         /// Adds an assertion to the specified fixture that the result returned will be an empty collection.
         /// </summary>
         /// <param name="fixture">The fixture.</param>
@@ -71,7 +86,7 @@ namespace GivenFixture.Extensions
         /// <param name="fixture">The fixture.</param>
         /// <param name="collection">The collection.</param>
         /// <returns></returns>
-        public static ITestFixture ShouldReturnCollectionOfLength(this ITestFixture fixture, IEnumerable collection) =>
+        public static ITestFixture ShouldReturnCollectionWithSameCount(this ITestFixture fixture, IEnumerable collection) =>
             fixture.ShouldReturn<IEnumerable>(x => x.Should().HaveSameCount(collection));
 
         /// <summary>
