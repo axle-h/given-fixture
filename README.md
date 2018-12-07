@@ -1,4 +1,4 @@
-[![Build status](https://ci.appveyor.com/api/projects/status/242cdlidfmyle6o2/branch/master?svg=true)](https://ci.appveyor.com/project/axle-h/given-fixture/branch/master)
+[![CircleCI](https://circleci.com/gh/axle-h/given-fixture/tree/master.svg?style=svg)](https://circleci.com/gh/axle-h/given-fixture/tree/master)
 [![NuGet](https://img.shields.io/nuget/v/given-fixture.svg)](https://www.nuget.org/packages/given-fixture/)
 
 # given-fixture
