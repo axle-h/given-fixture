@@ -65,9 +65,10 @@ namespace GivenFixture.Example
     internal static class BreakfastTestExtensions
     {
         public static ITestFixture HavingBreakfastItem(this ITestFixture fixture, BreakfastItemType type, out BreakfastItem item) =>
-            fixture.HavingModel(out item, c => c.With(x => x.Type, type)
-                                                .With(x => x.Name, type.ToString()))
-                   .HavingMocked<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(type), item);
+            fixture.HavingMocked<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(type),
+                                                                          out item,
+                                                                          c => c.With(x => x.Type, type)
+                                                                                .With(x => x.Name, type.ToString()));
 
 
         public static ITestFixture WhenGettingBreakfast(this ITestFixture fixture, params BreakfastItemType[] types) =>
