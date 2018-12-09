@@ -143,5 +143,63 @@ namespace GivenFixture.Extensions
                                                           string because = null)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).Returns(Task.CompletedTask).Verifiable(because));
+
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to throw the specified exception.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="exception">The exception.</param>
+        /// <param name="because">The because.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockThrow<TService>(this ITestFixture fixture,
+                                                             Expression<Action<TService>> expression,
+                                                             Exception exception,
+                                                             string because = null)
+            where TService : class =>
+            fixture.HavingMock<TService>(m => m.Setup(expression).Throws(exception).Verifiable(because));
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the
+        /// specified expression to throw an exception of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TException">The type of the exception.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="exception">The exception.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="because">The because.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockThrow<TService, TException>(this ITestFixture fixture,
+                                                                         Expression<Action<TService>> expression,
+                                                                         out TException exception,
+                                                                         Func<IPostprocessComposer<TException>, IPostprocessComposer<TException>> composer = null,
+                                                                         string because = null)
+            where TService : class
+            where TException : Exception =>
+            fixture.HavingModel(out exception, composer)
+                   .HavingMockThrow(expression, exception, because);
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the
+        /// specified expression to throw an exception of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TException">The type of the exception.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="because">The because.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockThrow<TService, TException>(this ITestFixture fixture,
+                                                                         Expression<Action<TService>> expression,
+                                                                         Func<IPostprocessComposer<TException>, IPostprocessComposer<TException>> composer = null,
+                                                                         string because = null)
+            where TService : class
+            where TException : Exception =>
+            fixture.HavingMockThrow(expression, out _, composer, because);
     }
 }

@@ -231,6 +231,8 @@ namespace GivenFixture
 
                 RunExceptionAssertions(e);
             }
+
+            AutoMock.MockRepository.VerifyAll();
         }
 
         private TSubject GetSubject<TSubject>() => AutoMock.Create<TSubject>(_parameters.ToArray());
