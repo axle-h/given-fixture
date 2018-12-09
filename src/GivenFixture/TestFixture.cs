@@ -74,19 +74,6 @@ namespace GivenFixture
         }
 
         /// <summary>
-        /// Specifies that the act step should use the specified static function.
-        /// </summary>
-        /// <typeparam name="TResult">The type of the result.</typeparam>
-        /// <param name="act">The act function.</param>
-        /// <returns></returns>
-        public ITestFixture When<TResult>(Func<TResult> act)
-        {
-            AssertNoActStep();
-            _act = () => act();
-            return this;
-        }
-
-        /// <summary>
         /// Specifies that the act step should use the specified asynchronous function and subject type.
         /// </summary>
         /// <typeparam name="TSubject">The type of the subject.</typeparam>
@@ -101,12 +88,42 @@ namespace GivenFixture
         }
 
         /// <summary>
+        /// Specifies that the act step should use the specified action and subject type.
+        /// </summary>
+        /// <typeparam name="TSubject">The type of the subject.</typeparam>
+        /// <param name="act">The act function.</param>
+        /// <returns></returns>
+        public ITestFixture When<TSubject>(Action<TSubject> act)
+        {
+            AssertNoActStep();
+            _act = () =>
+                   {
+                       act(GetSubject<TSubject>());
+                       return null;
+                   };
+            return this;
+        }
+
+        /// <summary>
         /// Specifies that the act step should use the specified static function.
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="act">The act function.</param>
         /// <returns></returns>
-        public ITestFixture When<TResult>(Func<Task<TResult>> act)
+        public ITestFixture WhenStatic<TResult>(Func<TResult> act)
+        {
+            AssertNoActStep();
+            _act = () => act();
+            return this;
+        }
+
+        /// <summary>
+        /// Specifies that the act step should use the specified static function.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="act">The act function.</param>
+        /// <returns></returns>
+        public ITestFixture WhenStatic<TResult>(Func<Task<TResult>> act)
         {
             AssertNoActStep();
             _actAsync = async () => await act();

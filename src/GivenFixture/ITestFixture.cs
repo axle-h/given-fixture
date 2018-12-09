@@ -47,15 +47,7 @@ namespace GivenFixture
         /// <param name="act">The act function.</param>
         /// <returns></returns>
         ITestFixture When<TSubject, TResult>(Func<TSubject, TResult> act);
-
-        /// <summary>
-        /// Specifies that the act step should use the specified static function.
-        /// </summary>
-        /// <typeparam name="TResult">The type of the result.</typeparam>
-        /// <param name="act">The act function.</param>
-        /// <returns></returns>
-        ITestFixture When<TResult>(Func<TResult> act);
-
+        
         /// <summary>
         /// Specifies that the act step should use the specified asynchronous function and subject type.
         /// </summary>
@@ -66,12 +58,28 @@ namespace GivenFixture
         ITestFixture When<TSubject, TResult>(Func<TSubject, Task<TResult>> act);
 
         /// <summary>
+        /// Specifies that the act step should use the specified action and subject type.
+        /// </summary>
+        /// <typeparam name="TSubject">The type of the subject.</typeparam>
+        /// <param name="act">The act function.</param>
+        /// <returns></returns>
+        ITestFixture When<TSubject>(Action<TSubject> act);
+
+        /// <summary>
         /// Specifies that the act step should use the specified static function.
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
         /// <param name="act">The act function.</param>
         /// <returns></returns>
-        ITestFixture When<TResult>(Func<Task<TResult>> act);
+        ITestFixture WhenStatic<TResult>(Func<TResult> act);
+
+        /// <summary>
+        /// Specifies that the act step should use the specified static function.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="act">The act function.</param>
+        /// <returns></returns>
+        ITestFixture WhenStatic<TResult>(Func<Task<TResult>> act);
 
         /// <summary>
         /// Includes the specified actions in the assert step.

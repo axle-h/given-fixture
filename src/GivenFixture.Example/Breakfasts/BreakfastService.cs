@@ -8,11 +8,6 @@ namespace GivenFixture.Example.Breakfasts
 {
     public class BreakfastService
     {
-        private static readonly ICollection<BreakfastItemType> FullEnglishTypes = Enum.GetValues(typeof(BreakfastItemType))
-                                                                                      .Cast<BreakfastItemType>()
-                                                                                      .OrderBy(x => x)
-                                                                                      .ToList();
-
         private readonly IBreakfastItemRepository _breakfastItemRepository;
 
         public BreakfastService(IBreakfastItemRepository breakfastItemRepository)
@@ -27,14 +22,25 @@ namespace GivenFixture.Example.Breakfasts
                 throw new ArgumentNullException(nameof(request));
             }
 
-            if (!(request.BreakfastItems?.Any() ?? false))
+            // Make sure we have some breakfast items.
+            if (request.BreakfastItems == null || !request.BreakfastItems.Any())
             {
                 throw new ArgumentException("All breakfasts must have breakfast items", nameof(request));
             }
 
-            var itemTasks = request.BreakfastItems.Distinct().Select(_breakfastItemRepository.GetBreakfastItemAsync);
+            // Get the breakfast items.
+            var itemTasks = request.BreakfastItems
+                                   .Distinct()
+                                   .Select(_breakfastItemRepository.GetBreakfastItemAsync);
             var items = await Task.WhenAll(itemTasks);
 
+            // Ensure we have all items.
+            if (items.Any(x => x == null))
+            {
+                return null;
+            }
+
+            // Make the breakfast.
             return new Breakfast
                    {
                        Price = items.Sum(i => i.Price),
@@ -42,18 +48,20 @@ namespace GivenFixture.Example.Breakfasts
                    };
         }
 
-        private static string GetItemNames(IEnumerable<BreakfastItem> items) =>
-            Regex.Replace(string.Join(", ", items.Select(i => i.Name)), ",(?=[^,]*$)", " and");
-
         private static string GetBreakfastName(ICollection<BreakfastItem> items)
         {
             var itemTypes = items.Select(x => x.Type).ToList();
 
-            if (FullEnglishTypes.All(itemTypes.Contains))
+            // Check for full english breakfast.
+            var isFullEnglish = Enum.GetValues(typeof(BreakfastItemType))
+                                    .Cast<BreakfastItemType>()
+                                    .All(itemTypes.Contains);
+            if (isFullEnglish)
             {
                 return "Full English Breakfast";
             }
-            
+
+            // Check for breakfast items on toast.
             if (itemTypes.Contains(BreakfastItemType.Toast))
             {
                 var notToast = items.Where(x => x.Type != BreakfastItemType.Toast).ToList();
@@ -61,7 +69,11 @@ namespace GivenFixture.Example.Breakfasts
                 return $"{GetItemNames(notToast)} on {toast.Name}";
             }
 
+            // Fall back to a list of all items.
             return GetItemNames(items);
         }
+
+        private static string GetItemNames(IEnumerable<BreakfastItem> items) =>
+            Regex.Replace(string.Join(", ", items.Select(i => i.Name)), ",(?=[^,]*$)", " and");
     }
 }
