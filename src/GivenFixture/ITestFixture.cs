@@ -40,6 +40,14 @@ namespace GivenFixture
         ITestFixture HavingSubjectParameters(params Parameter[] parameters);
 
         /// <summary>
+        /// Configures the subject with the specified action.
+        /// </summary>
+        /// <typeparam name="TSubject">The type of the subject.</typeparam>
+        /// <param name="configurator">The configurator.</param>
+        /// <returns></returns>
+        ITestFixture HavingConfiguredSubject<TSubject>(Action<TSubject> configurator);
+
+        /// <summary>
         /// Specifies that the act step should use the specified function and subject type.
         /// </summary>
         /// <typeparam name="TSubject"></typeparam>
@@ -47,7 +55,7 @@ namespace GivenFixture
         /// <param name="act">The act function.</param>
         /// <returns></returns>
         ITestFixture When<TSubject, TResult>(Func<TSubject, TResult> act);
-        
+
         /// <summary>
         /// Specifies that the act step should use the specified asynchronous function and subject type.
         /// </summary>
@@ -97,7 +105,7 @@ namespace GivenFixture
         ITestFixture ShouldReturn(params Action<object>[] asserts);
 
         /// <summary>
-        /// Adds an assertion to this fixture that an exception of the specified type is thrown by the act step.
+        /// Adds an action to the assert step that asserts that an exception of the specified type is thrown by the act step.
         /// </summary>
         /// <typeparam name="TException">The type of the exception.</typeparam>
         /// <param name="asserts">The asserts.</param>
@@ -105,7 +113,7 @@ namespace GivenFixture
         ITestFixture ShouldThrow<TException>(params Action<TException>[] asserts);
 
         /// <summary>
-        /// Adds an assertion to this fixture that an exception off nay type is thrown by the act step.
+        /// Adds an action to the assert step that asserts that an exception is thrown by the act step.
         /// </summary>
         /// <param name="asserts">The asserts.</param>
         /// <returns></returns>

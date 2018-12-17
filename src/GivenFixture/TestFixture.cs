@@ -16,6 +16,7 @@ namespace GivenFixture
         private readonly List<Parameter> _parameters = new List<Parameter>();
         private readonly List<Action<object>> _resultAssertions = new List<Action<object>>();
         private readonly List<Action<Exception>> _exceptionAssertions = new List<Action<Exception>>();
+        private readonly List<Action<object>> _subjectConfigurators = new List<Action<object>>();
         private Func<object> _act;
         private Func<Task<object>> _actAsync;
         private bool _shouldThrow;
@@ -56,6 +57,28 @@ namespace GivenFixture
         public ITestFixture HavingSubjectParameters(params Parameter[] parameters)
         {
             _parameters.AddRange(parameters);
+            return this;
+        }
+
+        /// <summary>
+        /// Configures the subject with the specified action.
+        /// </summary>
+        /// <typeparam name="TSubject">The type of the subject.</typeparam>
+        /// <param name="configurator">The configurator.</param>
+        /// <returns></returns>
+        public ITestFixture HavingConfiguredSubject<TSubject>(Action<TSubject> configurator)
+        {
+            _subjectConfigurators.Add(x =>
+                                      {
+                                          if (x is TSubject subject)
+                                          {
+                                              configurator(subject);
+                                          }
+                                          else
+                                          {
+                                              throw new ArgumentException("Incorrect subject type", nameof(TSubject));
+                                          }
+                                      });
             return this;
         }
 
@@ -252,7 +275,17 @@ namespace GivenFixture
             AutoMock.MockRepository.VerifyAll();
         }
 
-        private TSubject GetSubject<TSubject>() => AutoMock.Create<TSubject>(_parameters.ToArray());
+        private TSubject GetSubject<TSubject>()
+        {
+            var subject = AutoMock.Create<TSubject>(_parameters.ToArray());
+
+            foreach (var action in _subjectConfigurators)
+            {
+                action(subject);
+            }
+
+            return subject;
+        }
 
         private void AssertNoActStep()
         {
