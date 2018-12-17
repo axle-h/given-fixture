@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 using AutoFixture.Dsl;
@@ -78,6 +79,25 @@ namespace GivenFixture.Extensions
             fixture.HavingModel(out result, composer)
                    .HavingMocked(expression, result, because);
 
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a collection of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="because">The because.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockedCollection<TService, TResult>(this ITestFixture fixture,
+                                                                             Expression<Func<TService, Task<ICollection<TResult>>>> expression,
+                                                                             out ICollection<TResult> result,
+                                                                             Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer = null,
+                                                                             string because = null)
+            where TService : class =>
+            fixture.HavingModels(out result, composer)
+                   .HavingMocked(expression, result, because);
 
         /// <summary>
         /// Configures a mock of the specified type to setup a call matching the specified expression to return the specified result.
@@ -114,6 +134,26 @@ namespace GivenFixture.Extensions
                                                                    string because = null)
             where TService : class =>
             fixture.HavingModel(out result, composer)
+                   .HavingMocked(expression, result, because);
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a result of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="because">The because.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockedCollection<TService, TResult>(this ITestFixture fixture,
+                                                                             Expression<Func<TService, ICollection<TResult>>> expression,
+                                                                             out ICollection<TResult> result,
+                                                                             Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer = null,
+                                                                             string because = null)
+            where TService : class =>
+            fixture.HavingModels(out result, composer)
                    .HavingMocked(expression, result, because);
 
         /// <summary>
