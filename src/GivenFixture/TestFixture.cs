@@ -111,6 +111,23 @@ namespace GivenFixture
         }
 
         /// <summary>
+        /// Specifies that the act step should use the specified asynchronous function and subject type.
+        /// </summary>
+        /// <typeparam name="TSubject">The type of the subject.</typeparam>
+        /// <param name="act">The act function.</param>
+        /// <returns></returns>
+        public ITestFixture When<TSubject>(Func<TSubject, Task> act)
+        {
+            AssertNoActStep();
+            _actAsync = async () =>
+                        {
+                            await act(GetSubject<TSubject>());
+                            return null;
+                        };
+            return this;
+        }
+
+        /// <summary>
         /// Specifies that the act step should use the specified action and subject type.
         /// </summary>
         /// <typeparam name="TSubject">The type of the subject.</typeparam>

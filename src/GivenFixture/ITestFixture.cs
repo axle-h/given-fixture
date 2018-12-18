@@ -66,6 +66,14 @@ namespace GivenFixture
         ITestFixture When<TSubject, TResult>(Func<TSubject, Task<TResult>> act);
 
         /// <summary>
+        /// Specifies that the act step should use the specified asynchronous function and subject type.
+        /// </summary>
+        /// <typeparam name="TSubject">The type of the subject.</typeparam>
+        /// <param name="act">The act function.</param>
+        /// <returns></returns>
+        ITestFixture When<TSubject>(Func<TSubject, Task> act);
+
+        /// <summary>
         /// Specifies that the act step should use the specified action and subject type.
         /// </summary>
         /// <typeparam name="TSubject">The type of the subject.</typeparam>
