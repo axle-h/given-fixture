@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections;
 using FluentAssertions;
+using FluentAssertions.Equivalency;
 
 namespace GivenFixture.Extensions
 {
@@ -38,6 +39,19 @@ namespace GivenFixture.Extensions
         /// <returns></returns>
         public static ITestFixture ShouldReturnEquivalent<TResult>(this ITestFixture fixture, TResult result) =>
             fixture.ShouldReturn(x => x.Should().BeEquivalentTo(result));
+
+        /// <summary>
+        /// Adds an assertion to the specified fixture that the result returned should be an object equivalent to the specified result.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expected">The expected.</param>
+        /// <param name="config">The configuration.</param>
+        /// <returns></returns>
+        public static ITestFixture ShouldReturnEquivalent<TResult>(this ITestFixture fixture,
+                                                                   TResult expected,
+                                                                   Func<EquivalencyAssertionOptions<TResult>, EquivalencyAssertionOptions<TResult>> config) =>
+            fixture.ShouldReturn(r => r.Should().BeEquivalentTo(expected, config));
 
         /// <summary>
         /// Adds an assertion to the specified fixture that the result returned should be null.
