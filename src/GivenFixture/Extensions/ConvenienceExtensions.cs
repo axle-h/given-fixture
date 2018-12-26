@@ -25,6 +25,20 @@ namespace GivenFixture.Extensions
         }
 
         /// <summary>
+        /// Performs an arrange action and returns the result as an output parameter.
+        /// </summary>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="factory">The factory.</param>
+        /// <param name="result">The result.</param>
+        /// <returns></returns>
+        public static ITestFixture Having<TResult>(this ITestFixture fixture, Func<TResult> factory, out TResult result)
+        {
+            result = factory();
+            return fixture;
+        }
+
+        /// <summary>
         /// Picks a random model from the specified collection.
         /// </summary>
         /// <typeparam name="TModel">The type of the model.</typeparam>

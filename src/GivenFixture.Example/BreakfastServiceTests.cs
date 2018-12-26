@@ -25,7 +25,7 @@ namespace GivenFixture.Example
         [Fact]
         public Task When_attempting_to_get_breakfast_with_missing_item() =>
             Given.Fixture
-                 .HavingMocked<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(BreakfastItemType.Bacon), null)
+                 .HavingMockedAsync<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(BreakfastItemType.Bacon), null)
                  .WhenGettingBreakfast(BreakfastItemType.Bacon)
                  .ShouldReturnNull()
                  .RunAsync();
@@ -77,10 +77,10 @@ namespace GivenFixture.Example
         /// when called with the specified breakfast item type.
         /// </summary>
         public static ITestFixture HavingBreakfastItem(this ITestFixture fixture, BreakfastItemType type, out BreakfastItem item) =>
-            fixture.HavingMocked<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(type),
-                                                                          out item,
-                                                                          c => c.With(x => x.Type, type)
-                                                                                .With(x => x.Name, type.ToString()));
+            fixture.HavingMockedAsync<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(type),
+                                                                               out item,
+                                                                               c => c.With(x => x.Type, type)
+                                                                                     .With(x => x.Name, type.ToString()));
 
 
         /// <summary>
