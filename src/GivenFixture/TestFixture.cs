@@ -27,7 +27,7 @@ namespace GivenFixture
         /// <param name="strict">if set to <c>true</c> [strict].</param>
         internal TestFixture(bool strict)
         {
-            AutoMock = strict ? AutoMock.GetLoose() : AutoMock.GetStrict();
+            AutoMock = strict ? AutoMock.GetStrict() : AutoMock.GetLoose();
         }
 
         /// <summary>
@@ -252,6 +252,8 @@ namespace GivenFixture
 
                 RunExceptionAssertions(e);
             }
+
+            AutoMock.MockRepository.VerifyAll();
         }
 
         /// <summary>
