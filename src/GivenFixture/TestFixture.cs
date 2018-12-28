@@ -6,7 +6,6 @@ using Autofac.Core;
 using Autofac.Extras.Moq;
 using AutoFixture;
 using Bogus;
-using FluentAssertions;
 using GivenFixture.Infrastructure;
 
 namespace GivenFixture
@@ -178,8 +177,8 @@ namespace GivenFixture
         /// <returns></returns>
         public ITestFixture ShouldReturn<TResult>(params Action<TResult>[] asserts) =>
             asserts.Any()
-                ? ShouldReturn(asserts.Select<Action<TResult>, Action<object>>(a => o => a(o.Should().BeAssignableTo<TResult>().Which)).ToArray())
-                : ShouldReturn(o => o.Should().BeAssignableTo<TResult>());
+                ? ShouldReturn(asserts.Select(ShouldBeOfTypeWhich).ToArray())
+                : ShouldReturn(ShouldBeOfTypeWhich<TResult>());
 
         /// <summary>
         /// Includes the specified actions in the assert step.
@@ -201,10 +200,10 @@ namespace GivenFixture
         public ITestFixture ShouldThrow<TException>(params Action<TException>[] asserts)
         {
             var exceptionAssertions = asserts.Any()
-                                          ? asserts.Select<Action<TException>, Action<Exception>>(a => e => a(e.Should().BeOfType<TException>().Which))
-                                          : new Action<Exception>[] { o => o.Should().BeOfType<TException>() };
+                                          ? asserts.Select(ShouldBeOfTypeWhich).ToArray()
+                                          : new Action<Exception>[] { ShouldBeOfTypeWhich<TException>() };
 
-            return ShouldThrow(exceptionAssertions.ToArray());
+            return ShouldThrow(exceptionAssertions);
         }
 
         /// <summary>
@@ -335,5 +334,21 @@ namespace GivenFixture
                 }
             }
         }
+
+        private static Action<object> ShouldBeOfTypeWhich<TResult>(Action<TResult> assertion = null) =>
+            o =>
+            {
+                // We do not use FluentAssertions' Should().BeAssignableTo<TEntity> to do this
+                // as it throws a not very helpful null ref exception when the subject is null.
+                switch (o)
+                {
+                    case TResult r:
+                        assertion?.Invoke(r);
+                        break;
+
+                    default:
+                        throw new ArgumentException($"Expected result to be assignable to {typeof(TResult)} but is {o?.GetType().FullName ?? "[null]"}");
+                }
+            };
     }
 }
