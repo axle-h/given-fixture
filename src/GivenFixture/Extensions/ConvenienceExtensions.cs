@@ -66,7 +66,9 @@ namespace GivenFixture.Extensions
                                                        out TModel model,
                                                        Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer = null)
         {
-            model = fixture.GetComposer(composer).Create();
+            model = composer == null
+                        ? fixture.AutoFixture.Create<TModel>()
+                        : composer(fixture.AutoFixture.Build<TModel>()).Create();
             return fixture;
         }
 
@@ -82,7 +84,9 @@ namespace GivenFixture.Extensions
                                                         out ICollection<TModel> models,
                                                         Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer = null)
         {
-            models = fixture.GetComposer(composer).CreateMany().ToList();
+            models = composer == null
+                         ? fixture.AutoFixture.CreateMany<TModel>().ToList()
+                         : composer(fixture.AutoFixture.Build<TModel>()).CreateMany().ToList();
             return fixture;
         }
 
@@ -98,13 +102,6 @@ namespace GivenFixture.Extensions
         {
             fake = factory(fixture.Faker);
             return fixture;
-        }
-
-        private static IPostprocessComposer<TModel> GetComposer<TModel>(this ITestFixture fixture, 
-                                                                        Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer)
-        {
-            var builder = fixture.AutoFixture.Build<TModel>();
-            return composer == null ? builder : composer(builder);
         }
     }
 }
