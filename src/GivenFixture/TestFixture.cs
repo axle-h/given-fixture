@@ -172,6 +172,17 @@ namespace GivenFixture
         }
 
         /// <summary>
+        /// Adds an action to the assert step.
+        /// </summary>
+        /// <param name="assert">The assert.</param>
+        /// <returns></returns>
+        public ITestFixture Should(Action assert)
+        {
+            _resultAssertions.Add(_ => assert());
+            return this;
+        }
+
+        /// <summary>
         /// Includes the specified actions in the assert step.
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>

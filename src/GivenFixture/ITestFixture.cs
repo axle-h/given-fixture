@@ -98,6 +98,13 @@ namespace GivenFixture
         ITestFixture WhenStatic<TResult>(Func<Task<TResult>> act);
 
         /// <summary>
+        /// Adds an action to the assert step.
+        /// </summary>
+        /// <param name="assert">The assert.</param>
+        /// <returns></returns>
+        ITestFixture Should(Action assert);
+
+        /// <summary>
         /// Includes the specified actions in the assert step.
         /// </summary>
         /// <typeparam name="TResult">The type of the result.</typeparam>
