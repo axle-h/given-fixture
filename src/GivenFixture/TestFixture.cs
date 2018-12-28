@@ -12,6 +12,7 @@ namespace GivenFixture
 {
     internal class TestFixture : ITestFixture
     {
+        private readonly bool _verifyAll;
         private readonly List<Parameter> _parameters = new List<Parameter>();
         private readonly List<Action<object>> _resultAssertions = new List<Action<object>>();
         private readonly List<Action<Exception>> _exceptionAssertions = new List<Action<Exception>>();
@@ -24,8 +25,9 @@ namespace GivenFixture
         /// Initializes a new instance of the <see cref="TestFixture"/> class.
         /// </summary>
         /// <param name="strict">if set to <c>true</c> [strict].</param>
-        internal TestFixture(bool strict)
+        internal TestFixture(bool strict, bool verifyAll)
         {
+            _verifyAll = verifyAll;
             AutoMock = strict ? AutoMock.GetStrict() : AutoMock.GetLoose();
         }
 
@@ -252,7 +254,7 @@ namespace GivenFixture
                 RunExceptionAssertions(e);
             }
 
-            AutoMock.MockRepository.VerifyAll();
+            VerifyMocks();
         }
 
         /// <summary>
@@ -290,7 +292,19 @@ namespace GivenFixture
                 RunExceptionAssertions(e);
             }
 
-            AutoMock.MockRepository.VerifyAll();
+            VerifyMocks();
+        }
+
+        private void VerifyMocks()
+        {
+            if (_verifyAll)
+            {
+                AutoMock.MockRepository.VerifyAll();
+            }
+            else
+            {
+                AutoMock.MockRepository.Verify();
+            }
         }
 
         private TSubject GetSubject<TSubject>()
