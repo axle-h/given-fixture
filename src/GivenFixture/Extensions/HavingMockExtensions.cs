@@ -4,6 +4,7 @@ using System.Linq.Expressions;
 using System.Threading.Tasks;
 using Autofac.Core;
 using AutoFixture.Dsl;
+using AutoFixture.Kernel;
 using Moq;
 
 namespace GivenFixture.Extensions
@@ -261,5 +262,20 @@ namespace GivenFixture.Extensions
             where TService : class
             where TException : Exception =>
             fixture.HavingMockThrow(expression, out _, composer, parameters);
+
+        /// <summary>
+        /// Adds a type relay to the container so that requests to resolve <typeparam name="TTo"></typeparam> will be relayed to
+        /// mocks configured for <typeparam name="TFrom"></typeparam>.
+        /// </summary>
+        /// <typeparam name="TFrom">The type of from.</typeparam>
+        /// <typeparam name="TTo">The type of to.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingTypeRelay<TFrom, TTo>(this ITestFixture fixture)
+            where TFrom : TTo
+        {
+            fixture.AutoFixture.Customizations.Insert(0, new TypeRelay(typeof(TFrom), typeof(TTo)));
+            return fixture;
+        }
     }
 }
