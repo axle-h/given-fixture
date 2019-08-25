@@ -22,9 +22,10 @@ namespace GivenFixture
         private bool _shouldThrow;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="TestFixture"/> class.
+        /// Initializes a new instance of the <see cref="TestFixture" /> class.
         /// </summary>
-        /// <param name="strict">if set to <c>true</c> [strict].</param>
+        /// <param name="strict">if set to <c>true</c> then the mock behaviour will be set to strict.</param>
+        /// <param name="verifyAll">if set to <c>true</c> then all mocks will be verified.</param>
         internal TestFixture(bool strict, bool verifyAll)
         {
             _verifyAll = verifyAll;

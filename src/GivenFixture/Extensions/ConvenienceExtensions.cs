@@ -1,8 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using AutoFixture;
-using AutoFixture.Dsl;
 using Bogus;
 
 namespace GivenFixture.Extensions
@@ -51,42 +48,6 @@ namespace GivenFixture.Extensions
                                                         out TModel model)
         {
             model = fixture.Faker.Random.CollectionItem(models);
-            return fixture;
-        }
-
-        /// <summary>
-        /// Creates an auto fixture constructed instance of the specified model.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model.</typeparam>
-        /// <param name="fixture">The fixture.</param>
-        /// <param name="model">The model.</param>
-        /// <param name="composer">The composer.</param>
-        /// <returns></returns>
-        public static ITestFixture HavingModel<TModel>(this ITestFixture fixture,
-                                                       out TModel model,
-                                                       Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer = null)
-        {
-            model = composer == null
-                        ? fixture.AutoFixture.Create<TModel>()
-                        : composer(fixture.AutoFixture.Build<TModel>()).Create();
-            return fixture;
-        }
-
-        /// <summary>
-        /// Creates a collection of auto fixture constructed instances of the specified model.
-        /// </summary>
-        /// <typeparam name="TModel">The type of the model.</typeparam>
-        /// <param name="fixture">The fixture.</param>
-        /// <param name="models">The models.</param>
-        /// <param name="composer">The composer.</param>
-        /// <returns></returns>
-        public static ITestFixture HavingModels<TModel>(this ITestFixture fixture,
-                                                        out ICollection<TModel> models,
-                                                        Func<IPostprocessComposer<TModel>, IPostprocessComposer<TModel>> composer = null)
-        {
-            models = composer == null
-                         ? fixture.AutoFixture.CreateMany<TModel>().ToList()
-                         : composer(fixture.AutoFixture.Build<TModel>()).CreateMany().ToList();
             return fixture;
         }
 

@@ -79,8 +79,11 @@ namespace GivenFixture.Example
         public static ITestFixture HavingBreakfastItem(this ITestFixture fixture, BreakfastItemType type, out BreakfastItem item) =>
             fixture.HavingMockedAsync<IBreakfastItemRepository, BreakfastItem>(x => x.GetBreakfastItemAsync(type),
                                                                                out item,
-                                                                               c => c.With(x => x.Type, type)
-                                                                                     .With(x => x.Name, type.ToString()));
+                                                                               (f, m) =>
+                                                                               {
+                                                                                   m.Type = type;
+                                                                                   m.Name = type.ToString();
+                                                                               });
 
 
         /// <summary>

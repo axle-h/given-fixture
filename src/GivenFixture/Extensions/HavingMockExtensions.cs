@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Autofac.Core;
 using AutoFixture.Dsl;
 using AutoFixture.Kernel;
+using Bogus;
 using Moq;
 
 namespace GivenFixture.Extensions
@@ -23,10 +24,11 @@ namespace GivenFixture.Extensions
         /// <param name="service">The service.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMock<TService>(this ITestFixture fixture,
-                                                        Action<Mock<TService>> mockAction,
-                                                        out TService service,
-                                                        params Parameter[] parameters)
+        public static ITestFixture HavingMock<TService>(
+            this ITestFixture fixture,
+            Action<Mock<TService>> mockAction,
+            out TService service,
+            params Parameter[] parameters)
             where TService : class
         {
             var mock = fixture.AutoMock.Mock<TService>(parameters);
@@ -43,9 +45,10 @@ namespace GivenFixture.Extensions
         /// <param name="mockAction">The mock action.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMock<TService>(this ITestFixture fixture,
-                                                        Action<Mock<TService>> mockAction,
-                                                        params Parameter[] parameters)
+        public static ITestFixture HavingMock<TService>(
+            this ITestFixture fixture,
+            Action<Mock<TService>> mockAction,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock(mockAction, out _, parameters);
 
@@ -57,9 +60,10 @@ namespace GivenFixture.Extensions
         /// <param name="service">The service.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMock<TService>(this ITestFixture fixture,
-                                                        out TService service,
-                                                        params Parameter[] parameters)
+        public static ITestFixture HavingMock<TService>(
+            this ITestFixture fixture,
+            out TService service,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock(_ => {}, out service, parameters);
 
@@ -73,10 +77,11 @@ namespace GivenFixture.Extensions
         /// <param name="result">The result.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockedAsync<TService, TResult>(this ITestFixture fixture,
-                                                                        Expression<Func<TService, Task<TResult>>> expression,
-                                                                        TResult result,
-                                                                        params Parameter[] parameters)
+        public static ITestFixture HavingMockedAsync<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, Task<TResult>>> expression,
+            TResult result,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).ReturnsAsync(result).Verifiable(), parameters);
 
@@ -91,13 +96,35 @@ namespace GivenFixture.Extensions
         /// <param name="composer">The composer.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockedAsync<TService, TResult>(this ITestFixture fixture,
-                                                                        Expression<Func<TService, Task<TResult>>> expression,
-                                                                        out TResult result,
-                                                                        Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer = null,
-                                                                        params Parameter[] parameters)
+        public static ITestFixture HavingMockedAsync<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, Task<TResult>>> expression,
+            out TResult result,
+            Action<Faker, TResult> composer = null,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingModel(out result, composer)
+                .HavingMockedAsync(expression, result, parameters);
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a result of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockedComposedAsync<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, Task<TResult>>> expression,
+            out TResult result,
+            Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer,
+            params Parameter[] parameters)
+            where TService : class =>
+            fixture.HavingComposedModel(out result, composer)
                    .HavingMockedAsync(expression, result, parameters);
 
         /// <summary>
@@ -111,14 +138,36 @@ namespace GivenFixture.Extensions
         /// <param name="composer">The composer.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockedCollectionAsync<TService, TResult>(this ITestFixture fixture,
-                                                                                  Expression<Func<TService, Task<ICollection<TResult>>>> expression,
-                                                                                  out ICollection<TResult> result,
-                                                                                  Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer = null,
-                                                                                  params Parameter[] parameters)
+        public static ITestFixture HavingMockedCollectionAsync<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, Task<ICollection<TResult>>>> expression,
+            out ICollection<TResult> result,
+            Action<Faker, TResult> composer = null,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingModels(out result, composer)
-                   .HavingMockedAsync(expression, result, parameters);
+                .HavingMockedAsync(expression, result, parameters);
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a collection of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockedComposedCollectionAsync<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, Task<ICollection<TResult>>>> expression,
+            out ICollection<TResult> result,
+            Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer,
+            params Parameter[] parameters)
+            where TService : class =>
+            fixture.HavingComposedModels(out result, composer)
+                .HavingMockedAsync(expression, result, parameters);
 
         /// <summary>
         /// Configures a mock of the specified type to setup a call matching the specified expression to return the specified result.
@@ -130,10 +179,11 @@ namespace GivenFixture.Extensions
         /// <param name="result">The result.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMocked<TService, TResult>(this ITestFixture fixture,
-                                                                   Expression<Func<TService, TResult>> expression,
-                                                                   TResult result,
-                                                                   params Parameter[] parameters)
+        public static ITestFixture HavingMocked<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, TResult>> expression,
+            TResult result,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).Returns(result).Verifiable(), parameters);
 
@@ -148,13 +198,35 @@ namespace GivenFixture.Extensions
         /// <param name="composer">The composer.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMocked<TService, TResult>(this ITestFixture fixture,
-                                                                   Expression<Func<TService, TResult>> expression,
-                                                                   out TResult result,
-                                                                   Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer = null,
-                                                                   params Parameter[] parameters)
+        public static ITestFixture HavingMocked<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, TResult>> expression,
+            out TResult result,
+            Action<Faker, TResult> composer = null,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingModel(out result, composer)
+                .HavingMocked(expression, result, parameters);
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a result of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockedComposed<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, TResult>> expression,
+            out TResult result,
+            Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer,
+            params Parameter[] parameters)
+            where TService : class =>
+            fixture.HavingComposedModel(out result, composer)
                    .HavingMocked(expression, result, parameters);
 
         /// <summary>
@@ -168,13 +240,35 @@ namespace GivenFixture.Extensions
         /// <param name="composer">The composer.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockedCollection<TService, TResult>(this ITestFixture fixture,
-                                                                             Expression<Func<TService, ICollection<TResult>>> expression,
-                                                                             out ICollection<TResult> result,
-                                                                             Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer = null,
-                                                                             params Parameter[] parameters)
+        public static ITestFixture HavingMockedCollection<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, ICollection<TResult>>> expression,
+            out ICollection<TResult> result,
+            Action<Faker, TResult> composer = null,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingModels(out result, composer)
+                .HavingMocked(expression, result, parameters);
+
+        /// <summary>
+        /// Configures a mock of the specified type to setup a call matching the specified expression to return a result of the specified type.
+        /// </summary>
+        /// <typeparam name="TService">The type of the service.</typeparam>
+        /// <typeparam name="TResult">The type of the result.</typeparam>
+        /// <param name="fixture">The fixture.</param>
+        /// <param name="expression">The expression.</param>
+        /// <param name="result">The result.</param>
+        /// <param name="composer">The composer.</param>
+        /// <param name="parameters">The parameters.</param>
+        /// <returns></returns>
+        public static ITestFixture HavingMockedComposedCollection<TService, TResult>(
+            this ITestFixture fixture,
+            Expression<Func<TService, ICollection<TResult>>> expression,
+            out ICollection<TResult> result,
+            Func<IPostprocessComposer<TResult>, IPostprocessComposer<TResult>> composer,
+            params Parameter[] parameters)
+            where TService : class =>
+            fixture.HavingComposedModels(out result, composer)
                    .HavingMocked(expression, result, parameters);
 
         /// <summary>
@@ -185,9 +279,10 @@ namespace GivenFixture.Extensions
         /// <param name="expression">The expression.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMocked<TService>(this ITestFixture fixture,
-                                                          Expression<Action<TService>> expression,
-                                                          params Parameter[] parameters)
+        public static ITestFixture HavingMocked<TService>(
+            this ITestFixture fixture,
+            Expression<Action<TService>> expression,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).Verifiable(), parameters);
 
@@ -199,9 +294,10 @@ namespace GivenFixture.Extensions
         /// <param name="expression">The expression.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockedAsync<TService>(this ITestFixture fixture,
-                                                               Expression<Func<TService, Task>> expression,
-                                                               params Parameter[] parameters)
+        public static ITestFixture HavingMockedAsync<TService>(
+            this ITestFixture fixture,
+            Expression<Func<TService, Task>> expression,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).Returns(Task.CompletedTask).Verifiable(), parameters);
 
@@ -215,10 +311,11 @@ namespace GivenFixture.Extensions
         /// <param name="exception">The exception.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockThrow<TService>(this ITestFixture fixture,
-                                                             Expression<Action<TService>> expression,
-                                                             Exception exception,
-                                                             params Parameter[] parameters)
+        public static ITestFixture HavingMockThrow<TService>(
+            this ITestFixture fixture,
+            Expression<Action<TService>> expression,
+            Exception exception,
+            params Parameter[] parameters)
             where TService : class =>
             fixture.HavingMock<TService>(m => m.Setup(expression).Throws(exception).Verifiable(), parameters);
 
@@ -234,14 +331,15 @@ namespace GivenFixture.Extensions
         /// <param name="composer">The composer.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockThrow<TService, TException>(this ITestFixture fixture,
-                                                                         Expression<Action<TService>> expression,
-                                                                         out TException exception,
-                                                                         Func<IPostprocessComposer<TException>, IPostprocessComposer<TException>> composer = null,
-                                                                         params Parameter[] parameters)
+        public static ITestFixture HavingMockThrow<TService, TException>(
+            this ITestFixture fixture,
+            Expression<Action<TService>> expression,
+            out TException exception,
+            Func<IPostprocessComposer<TException>, IPostprocessComposer<TException>> composer = null,
+            params Parameter[] parameters)
             where TService : class
             where TException : Exception =>
-            fixture.HavingModel(out exception, composer)
+            fixture.HavingComposedModel(out exception, composer)
                    .HavingMockThrow(expression, exception, parameters);
 
         /// <summary>
@@ -255,10 +353,11 @@ namespace GivenFixture.Extensions
         /// <param name="composer">The composer.</param>
         /// <param name="parameters">The parameters.</param>
         /// <returns></returns>
-        public static ITestFixture HavingMockThrow<TService, TException>(this ITestFixture fixture,
-                                                                         Expression<Action<TService>> expression,
-                                                                         Func<IPostprocessComposer<TException>, IPostprocessComposer<TException>> composer = null,
-                                                                         params Parameter[] parameters)
+        public static ITestFixture HavingMockThrow<TService, TException>(
+            this ITestFixture fixture,
+            Expression<Action<TService>> expression,
+            Func<IPostprocessComposer<TException>, IPostprocessComposer<TException>> composer = null,
+            params Parameter[] parameters)
             where TService : class
             where TException : Exception =>
             fixture.HavingMockThrow(expression, out _, composer, parameters);
